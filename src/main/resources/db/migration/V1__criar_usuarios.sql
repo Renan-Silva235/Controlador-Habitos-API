@@ -1,0 +1,8 @@
+CREATE TABLE Usuarios(
+    id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    nome VARCHAR(100) NOT NULL,
+    email VARCHAR(200) NOT NULL UNIQUE,
+    senha VARCHAR(65) NOT NULL,
+    email_verificado BOOLEAN NOT NULL DEFAULT FALSE,
+    data_criacao TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
