@@ -26,6 +26,12 @@ public class User {
     @Column(name = "email_verificado", nullable = false)
     private boolean emailVerified = false;
 
+    @Column(name = "tentativas_login", nullable = false)
+    private int loginAttempts = 0;
+
+    @Column(name = "bloqueado_ate")
+    private LocalDateTime lockedUntil;
+
     @Column(name = "data_criacao", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -68,6 +74,22 @@ public class User {
 
     public void setEmailVerified(boolean emailVerified) {
         this.emailVerified = emailVerified;
+    }
+
+    public int getLoginAttempts() {
+        return loginAttempts;
+    }
+
+    public void setLoginAttempts(int loginAttempts) {
+        this.loginAttempts = loginAttempts;
+    }
+
+    public LocalDateTime getLockedUntil() {
+        return lockedUntil;
+    }
+
+    public void setLockedUntil(LocalDateTime lockedUntil) {
+        this.lockedUntil = lockedUntil;
     }
 
     public LocalDateTime getCreatedAt() {

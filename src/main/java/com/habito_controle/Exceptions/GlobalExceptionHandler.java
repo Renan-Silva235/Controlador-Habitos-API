@@ -19,8 +19,8 @@ public class GlobalExceptionHandler {
   }
 
   @ExceptionHandler(ApiException.class)
-  public ResponseEntity<ErrorResponse> handleEmailAlreadyExists(ApiException error){
-    return build(HttpStatus.CONFLICT, error.getMessage());
+  public ResponseEntity<ErrorResponse> handleApiException(ApiException error){
+    return build(error.getStatus(), error.getMessage());
   }
 
   @ExceptionHandler(MethodArgumentNotValidException.class)
