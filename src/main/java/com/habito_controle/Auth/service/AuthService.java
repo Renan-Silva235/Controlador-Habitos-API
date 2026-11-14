@@ -1,6 +1,7 @@
 package com.habito_controle.Auth.service;
 
 import com.habito_controle.Auth.dto.request.LoginDto;
+import com.habito_controle.Auth.dto.request.RefreshTokenDto;
 import com.habito_controle.Auth.dto.request.ResendCodeDto;
 import com.habito_controle.Auth.dto.request.VerifyEmailDto;
 import com.habito_controle.Auth.dto.response.LoginResponseDto;
@@ -26,6 +27,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class AuthService {
@@ -33,6 +35,7 @@ public class AuthService {
     private static final int MAX_LOGIN_ATTEMPTS = 5;
     private static final int LOCK_MINUTES = 5;
     private static final String TOO_MANY_ATTEMPTS_MESSAGE = "Muitas tentativas incorretas. Tente novamente em 5 minutos.";
+    private static final String SESSION_EXPIRED_MESSAGE = "Sua sessão expirou. Faça login novamente.";
 
     @Autowired
     private UserRepository userRepository;
@@ -137,5 +140,47 @@ public class AuthService {
         sessionRepository.save(session);
 
         return new LoginResponseDto(accessToken, refreshToken);
+    }
+
+    @Transactional(noRollbackFor = ApiException.class)
+    public LoginResponseDto refresh(RefreshTokenDto refreshTokenDto) {
+        String refreshToken = refreshTokenDto.refreshToken();
+
+        UUID userId = jwtService.validateRefreshToken(refreshToken)
+                .orElseThrow(() -> new UnauthorizedException(SESSION_EXPIRED_MESSAGE));
+
+        Session session = sessionRepository
+                .findByRefreshTokenHashAndActiveTrue(jwtService.hashToken(refreshToken))
+                .orElseThrow(() -> new UnauthorizedException(SESSION_EXPIRED_MESSAGE));
+
+        LocalDateTime now = LocalDateTime.now();
+
+        if (session.getExpiresAt().isBefore(now) || !session.getUser().getId().equals(userId)) {
+            session.setActive(false);
+            sessionRepository.save(session);
+            throw new UnauthorizedException(SESSION_EXPIRED_MESSAGE);
+        }
+
+        User user = session.getUser();
+
+        String newAccessToken = jwtService.generateAccessToken(user);
+        String newRefreshToken = jwtService.generateRefreshToken(user);
+
+        session.setRefreshTokenHash(jwtService.hashToken(newRefreshToken));
+        session.setExpiresAt(now.plusDays(refreshExpirationDays));
+        session.setLastAccessAt(now);
+        sessionRepository.save(session);
+
+        return new LoginResponseDto(newAccessToken, newRefreshToken);
+    }
+
+    @Transactional
+    public void logout(RefreshTokenDto refreshTokenDto) {
+        sessionRepository
+                .findByRefreshTokenHashAndActiveTrue(jwtService.hashToken(refreshTokenDto.refreshToken()))
+                .ifPresent(session -> {
+                    session.setActive(false);
+                    sessionRepository.save(session);
+                });
     }
 }

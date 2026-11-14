@@ -14,7 +14,7 @@ public record UserRegisterDto(
         @NotBlank(message = "O campo email é obrigatório.")
         String email,
 
-        @NotBlank(message = "O campo email é obrigatório.")
+        @NotBlank(message = "O campo Senha é obrigatório.")
         @Size(min = 6, message = "O campo senha deve ter no mínimo 6 caracteres.")
         String password
 ) {}

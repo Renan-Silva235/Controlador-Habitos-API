@@ -1,6 +1,7 @@
 package com.habito_controle.Auth.controller;
 
 import com.habito_controle.Auth.dto.request.LoginDto;
+import com.habito_controle.Auth.dto.request.RefreshTokenDto;
 import com.habito_controle.Auth.dto.request.ResendCodeDto;
 import com.habito_controle.Auth.dto.request.VerifyEmailDto;
 import com.habito_controle.Auth.dto.response.LoginResponseDto;
@@ -35,5 +36,16 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDto> login(@RequestBody @Valid LoginDto loginDto) {
         return ResponseEntity.ok(authService.login(loginDto));
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponseDto> refresh(@RequestBody @Valid RefreshTokenDto refreshTokenDto) {
+        return ResponseEntity.ok(authService.refresh(refreshTokenDto));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody @Valid RefreshTokenDto refreshTokenDto) {
+        authService.logout(refreshTokenDto);
+        return ResponseEntity.ok().build();
     }
 }

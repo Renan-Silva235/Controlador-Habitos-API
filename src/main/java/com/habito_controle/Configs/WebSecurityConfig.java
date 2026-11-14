@@ -28,7 +28,11 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/auth/register", "/auth/verify-email", "/auth/resend-code", "/auth/login").permitAll()
+                        .requestMatchers("/user/register").permitAll()
+                        .requestMatchers("/auth/verify-email").permitAll()
+                        .requestMatchers("/auth/resend-code").permitAll()
+                        .requestMatchers("/auth/login").permitAll()
+                        .requestMatchers("/auth/refresh").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exceptions -> exceptions

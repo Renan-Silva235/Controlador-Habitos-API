@@ -19,19 +19,20 @@ import java.util.UUID;
 
 @Service
 public class JwtService {
+
     private final Algorithm algorithm;
     private final long accessExpirationMinutes;
     private final long refreshExpirationDays;
 
     public JwtService(@Value("${jwt.secret}") String secret,
                       @Value("${jwt.access-expiration-minutes}") long accessExpirationMinutes,
-                      @Value("${jwt.refresh-expiration-days}") long refreshExpirationDays){
+                      @Value("${jwt.refresh-expiration-days}") long refreshExpirationDays) {
         this.algorithm = Algorithm.HMAC256(secret);
         this.accessExpirationMinutes = accessExpirationMinutes;
         this.refreshExpirationDays = refreshExpirationDays;
     }
 
-    public String generateAccessToken(User user){
+    public String generateAccessToken(User user) {
         Instant now = Instant.now();
 
         return JWT.create()
@@ -55,15 +56,23 @@ public class JwtService {
                 .sign(algorithm);
     }
 
-    public Optional<UUID> validateAccessToken(String token){
+    public Optional<UUID> validateAccessToken(String token) {
+        return validateToken(token, "access");
+    }
+
+    public Optional<UUID> validateRefreshToken(String token) {
+        return validateToken(token, "refresh");
+    }
+
+    private Optional<UUID> validateToken(String token, String type) {
         try {
             DecodedJWT decoded = JWT.require(algorithm)
-                    .withClaim("type", "access")
+                    .withClaim("type", type)
                     .build()
                     .verify(token);
 
             return Optional.of(UUID.fromString(decoded.getSubject()));
-        }catch (JWTVerificationException | IllegalArgumentException error){
+        } catch (JWTVerificationException | IllegalArgumentException e) {
             return Optional.empty();
         }
     }
