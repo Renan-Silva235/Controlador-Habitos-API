@@ -1,5 +1,6 @@
 package com.habito_controle.User.controller;
 
+import com.habito_controle.GenericDto.ApiResponse;
 import com.habito_controle.User.dto.request.UserRegisterDto;
 import com.habito_controle.User.service.UserService;
 import jakarta.validation.Valid;
@@ -11,6 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -19,8 +22,9 @@ public class UserController {
     private UserService userService;
 
     @PostMapping("/register")
-    public ResponseEntity<String> register(@RequestBody @Valid UserRegisterDto userRegisterDto){
+    public ResponseEntity<ApiResponse<Void>> register(@RequestBody @Valid UserRegisterDto userRegisterDto){
         userService.registerUser(userRegisterDto);
-        return ResponseEntity.status(HttpStatus.CREATED).body("Usuário Cadastrado com Sucesso");
+        return ResponseEntity.status(HttpStatus.CREATED).body(ApiResponse.success("Usuário Cadastrado com Sucesso!"));
     }
 }
+
